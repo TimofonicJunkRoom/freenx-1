@@ -1,7 +1,6 @@
 #!/bin/sh
 
-if [ -z "$NXCUPS_PORT" -a -z "$NXSAMBA_PORT" ]
-then
+if [ -z "$NXCUPS_PORT" -a -z "$NXSAMBA_PORT" ]; then
 	echo "nxredir: Redirect standard ports to nxproxy"
 	echo ""
 	echo "Usage: export NXCUPS_PORT='where_cups_is_running'"

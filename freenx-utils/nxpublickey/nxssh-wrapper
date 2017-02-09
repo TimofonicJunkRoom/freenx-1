@@ -35,69 +35,70 @@ NXSSH_ORIG="mxssh"
 
 CONN=$(echo "$@" | sed 's/.*nx@//g' | cut -d" " -f1)
 
-case "$CONN" in @*) NXWRAP=1; CONN=$(echo $CONN | cut -d'@' -f2); esac
+case "$CONN" in @*)
+	NXWRAP=1
+	CONN=$(echo $CONN | cut -d'@' -f2)
+	;;
+esac
 
-if [ "$NXWRAP" = "1" ]
-then
+if [ "$NXWRAP" = "1" ]; then
 	cat <<EOF
 NX> 203 NXSSH running with pid: $$
 NX> 200 Connected to address: 127.0.0.1 on port: 22
 NX> 202 Authenticating user: nx
 NX> 208 Using auth method: publickey
 EOF
-	
-	echo "HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)"	
+
+	echo "HELLO NXSERVER - Version 3.2.0 OS (GPL Edition)"
 
 	# Login stage
-	while true
-	do
+	while true; do
 		echo -n "NX> 105 "
 		read CMD
 		# FIXME?
 		[ "$CMD" = "" ] && CMD="quit"
 		echo "$CMD"
-		
-		case "$CMD" in 
-			quit|QUIT)
+
+		case "$CMD" in
+			quit | QUIT)
 				echo "Quit"
 				echo "NX> 999 Bye"
 				exit 0
-			;;
-			exit|EXIT)
+				;;
+			exit | EXIT)
 				echo "Exit"
 				echo "NX> 999 Bye"
 				exit 0
-			;;
-			bye|BYE)
+				;;
+			bye | BYE)
 				echo "Bye"
 				echo "NX> 999 Bye"
 				exit 0
-			;;
-			hello*|HELLO*)
+				;;
+			hello* | HELLO*)
 				PROTO=$(echo $CMD | sed 's/.*Version \(.*\)/\1/g')
 				echo "NX> 134 Accepted protocol: $PROTO"
-			;;
-			"set auth_mode*"|"SET AUTH_MODE*")
-				if [ "$CMD" = "set auth_mode password" -o "$CMD" = "SET AUTH_MODE PASSWORD" ]
-				then
+				;;
+			"set auth_mode*" | "SET AUTH_MODE*")
+				if [ "$CMD" = "set auth_mode password" -o "$CMD" = "SET AUTH_MODE PASSWORD" ]; then
 					echo "Set auth_mode: password"
 				else
 					echo "NX> 500 ERROR: unknown auth mode ''"
 				fi
-			;;
-			login|LOGIN)
+				;;
+			login | LOGIN)
 				LOGIN_SUCCESS="0"
-				
+
 				echo -n "NX> 101 User: "
 				read USER2
 				echo $USER2
 
 				echo -n "NX> 102 Password: "
 				break
-			;;
+				;;
 		esac
 	done
-	
+
 	#
 	# Check which mode to use: PW or normal ssh
 	#
@@ -106,16 +107,16 @@ EOF
 	# Use password for authentication
 	PWMODE="1"
 
-	case "$USER2" in 
+	case "$USER2" in
 		"@"*)
 			# do not use password for authentication
 			PWMODE=0
 			USER2=$(echo $USER2 | cut -d'@' -f2,3)
-			
+
 			# So read it out from client
 			read -s PASS
 			unset PASS
-		;;
+			;;
 	esac
 
 	#
@@ -123,8 +124,8 @@ EOF
 	#
 	# Syntax: user@U or user@S or user
 	# 
-	
-	case "$USER2" in 
+
+	case "$USER2" in
 		*"@"*)
 			MODE=$(echo $USER2 | cut -d'@' -f2)
 			USER2=$(echo $USER2 | cut -d'@' -f1)
@@ -132,33 +133,31 @@ EOF
 			# Parse for : part
 			BINARY=$(echo $MODE | cut -d':' -f2)
 			MODE=$(echo $MODE | cut -d':' -f1)
-			
+
 			[ "$MODE" = "U" ] && NXSERVER_SUID=/bin/false
 			[ "$MODE" = "S" ] && NXSERVER_USERMODE=/bin/falsedoesnotexist
-			
+
 			# Did we get a hint that another binary should be used?
 
 			[ -n "$BINARY" -a "$MODE" = "U" ] && NXSERVER_USERMODE="$BINARY $NXSERVER_USERMODE"
 			[ -n "$BINARY" -a "$MODE" = "S" ] && NXSERVER_SUID="$BINARY $NXSERVER_SUID"
-		;;
+			;;
 	esac
-	
+
 	export REMOTE_COMMAND='export PATH='"$NXSERVER_PATH"':"$PATH"; for i in $(which -a '"$NXSERVER_SUID"'); do if [ -x "$i" -a -u "$i" ]; then unset SSH_CLIENT SSH_CLIENT2; export SSH_CLIENT="127.0.0.1 56404 127.0.0.1 22"; exec "$i"; fi; done; for i in $(which -a '"$NXSERVER_USERMODE"'); do if [ -x "$i" -a ! -u "$i" -a ! -L "$i" ]; then exec "$i"; fi; done; echo "NX> 596 Service not available."; echo "NX> 999 Bye"'
 
-	if [ "$PWMODE" = "1" ]
-	then 
-		$(dirname $0)/$NXSSH_ORIG -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "'$REMOTE_COMMAND'" 
+	if [ "$PWMODE" = "1" ]; then
+		$(dirname $0)/$NXSSH_ORIG -nxstdinpass "$USER2@$CONN" -x -2 -B -o "NumberOfPasswordPrompts 1" sh -c "'$REMOTE_COMMAND'"
 	else
 		[ -z "$SSH_ASKPASS" ] && export SSH_ASKPASS=/usr/bin/ssh-askpass
 
 		$(dirname $0)/$NXSSH_ORIG "$USER2@$CONN" -x -2 -B sh -c "'$REMOTE_COMMAND'"
 	fi
 
-	if [ $? -ne 0 ]
-	then
+	if [ $? -ne 0 ]; then
 		echo "NX> 404 ERROR: wrong password or login."
-        	echo "NX> 999 Bye"
-	        exit 1
+		echo "NX> 999 Bye"
+		exit 1
 	fi
 
 else # do not wrap it

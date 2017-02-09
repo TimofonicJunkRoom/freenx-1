@@ -13,13 +13,11 @@
 #
 # It is assumed that you forward the port via ssh -R.
 
-if [ $# -lt 1 ]
-then
+if [ $# -lt 1 ]; then
 	echo "Usage: $(basename $0) <directory> <cookie> [port]"
 fi
 
-if [ $1 = '-' ]
-then
+if [ $1 = '-' ]; then
 	echo -n "Please provide password: "
 	read -s rawcookie
 	echo ""
@@ -32,6 +30,6 @@ PORT=$3
 [ -z "$PORT" ] && PORT=6201
 
 # We use md5sum so that no one can get our original session cookie to easily
-cookie=$(htpasswd -nbs nxfish ":NXFISH:$rawcookie" | cut -d: -f2 )
+cookie=$(htpasswd -nbs nxfish ":NXFISH:$rawcookie" | cut -d: -f2)
 
 faucet $PORT -io sh -c 'echo "FISH:" ; ./nx-fishsrv.pl '"'$1'"' '"'$cookie'"''

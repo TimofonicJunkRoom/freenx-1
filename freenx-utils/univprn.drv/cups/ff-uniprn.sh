@@ -9,10 +9,9 @@ export DISPLAY=:1.0
 # prefiltering
 TMPDIR=$(mktemp -d /tmp/ff-uniprn.XXXXXXXXXX) || exit 1
 (
-cd $TMPDIR
-dd bs=1k of=testdoc.pdf
-LD_LIBRARY_PATH=/usr/local/lib/ wine /home/info/ff/public/SPLFilter/SPLFilter.exe
-cat test.spl
+	cd $TMPDIR
+	dd bs=1k of=testdoc.pdf
+	LD_LIBRARY_PATH=/usr/local/lib/ wine /home/info/ff/public/SPLFilter/SPLFilter.exe
+	cat test.spl
 )
 rm -rf "$TMPDIR"
-

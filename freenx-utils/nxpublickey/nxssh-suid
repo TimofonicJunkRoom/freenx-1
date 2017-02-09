@@ -12,8 +12,7 @@ CONN=$(echo "$@" | sed 's/.*nx@//g' | cut -d" " -f1)
 unset NXWRAP
 case "$CONN" in *@*) NXWRAP=1 ;; esac
 
-if [ "$NXWRAP" = "1" ]
-then
+if [ "$NXWRAP" = "1" ]; then
 
 	cat <<EOF
 NX> 203 NXSSH running with pid: $$
