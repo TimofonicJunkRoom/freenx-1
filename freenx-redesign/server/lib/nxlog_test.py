@@ -34,139 +34,141 @@ __copyright__ = 'Copyright 2007 Google Inc.'
 
 
 class NXLogUnitTest(unittest.TestCase):
-  """Unit test for nxlog module."""
 
-  def mock_syslog_openlog(self, ident, opt = None, facility = None):
-    """Flag that this mock syslog function has been called"""
+    """Unit test for nxlog module."""
 
-    self._openlog_called = True
+    def mock_syslog_openlog(self, ident, opt=None, facility=None):
+        """Flag that this mock syslog function has been called"""
 
-  def mock_syslog_syslog(self, level, message = None):
-    """Flag that this mock syslog function has been called"""
+        self._openlog_called = True
 
-    self._syslog_called = True
+    def mock_syslog_syslog(self, level, message=None):
+        """Flag that this mock syslog function has been called"""
 
-  def setUp(self):
-    """Install mock versions of the syscall functions."""
+        self._syslog_called = True
 
-    self._saved_openlog = syslog.openlog
-    self._saved_syslog = syslog.syslog
-    syslog.openlog = self.mock_syslog_openlog
-    syslog.syslog = self.mock_syslog_syslog
-    self._openlog_called = False
-    self._syslog_called = False
+    def setUp(self):
+        """Install mock versions of the syscall functions."""
 
-  def tearDown(self):
-    """Remove the mocked versions of the syscall functions."""
+        self._saved_openlog = syslog.openlog
+        self._saved_syslog = syslog.syslog
+        syslog.openlog = self.mock_syslog_openlog
+        syslog.syslog = self.mock_syslog_syslog
+        self._openlog_called = False
+        self._syslog_called = False
 
-    syslog.openlog = self._saved_openlog 
-    syslog.syslog = self._saved_syslog 
+    def tearDown(self):
+        """Remove the mocked versions of the syscall functions."""
 
-  def testSetupSyslog(self):
-    """Test the code path through the syslog setup function."""
+        syslog.openlog = self._saved_openlog
+        syslog.syslog = self._saved_syslog
 
-    nxlog.__dict__['__setup_syslog']('syslog_test')
+    def testSetupSyslog(self):
+        """Test the code path through the syslog setup function."""
 
-    self.failUnless(self._openlog_called)
+        nxlog.__dict__['__setup_syslog']('syslog_test')
 
-  def testLogSyslog(self):
-    """Test the code path through the syslog log function."""
+        self.failUnless(self._openlog_called)
 
-    nxlog.__dict__['__log_syslog'](0, 'syslog_test_message')
+    def testLogSyslog(self):
+        """Test the code path through the syslog log function."""
 
-    self.failUnless(self._syslog_called)
+        nxlog.__dict__['__log_syslog'](0, 'syslog_test_message')
 
-  def testSetupStderr(self):
-    """Test the code path through the stderr setup function."""
+        self.failUnless(self._syslog_called)
 
-    name = 'stderr_test_name'
+    def testSetupStderr(self):
+        """Test the code path through the stderr setup function."""
 
-    nxlog.__dict__['__setup_stderr'](name)
+        name = 'stderr_test_name'
 
-    self.assertEqual(name, nxlog.__dict__['__stderr_name'])
+        nxlog.__dict__['__setup_stderr'](name)
 
-  def testLogStderr(self):
-    """Test the code path through the stderr log function."""
+        self.assertEqual(name, nxlog.__dict__['__stderr_name'])
 
-    nxlog.__dict__['__log_stderr'](0, 'stderr_test_message')
+    def testLogStderr(self):
+        """Test the code path through the stderr log function."""
 
-  def testInternalSetup(self):
-    """Test calling __setup()"""
+        nxlog.__dict__['__log_stderr'](0, 'stderr_test_message')
 
-    nxlog.__dict__['__setup']('setup_test_name')
+    def testInternalSetup(self):
+        """Test calling __setup()"""
 
-    log_level = nxlog.__dict__['__level']
+        nxlog.__dict__['__setup']('setup_test_name')
 
-    self.failUnless(log_level in [nxlog.LOG_EMERG, nxlog.LOG_ALERT,
-                                  nxlog.LOG_CRIT, nxlog.LOG_ERR,
-                                  nxlog.LOG_WARNING, nxlog.LOG_NOTICE,
-                                  nxlog.LOG_INFO, nxlog.LOG_DEBUG])
+        log_level = nxlog.__dict__['__level']
 
-  def testInternalSetupEnvionment(self):
-    """Test calling __setup() with a log level environment variable"""
+        self.failUnless(log_level in [nxlog.LOG_EMERG, nxlog.LOG_ALERT,
+                                      nxlog.LOG_CRIT, nxlog.LOG_ERR,
+                                      nxlog.LOG_WARNING, nxlog.LOG_NOTICE,
+                                      nxlog.LOG_INFO, nxlog.LOG_DEBUG])
 
-    os.environ['LOG_LEVEL'] = 'ERR'
+    def testInternalSetupEnvionment(self):
+        """Test calling __setup() with a log level environment variable"""
 
-    nxlog.__dict__['__setup']('setup_test_name')
+        os.environ['LOG_LEVEL'] = 'ERR'
 
-    log_level = nxlog.__dict__['__level']
+        nxlog.__dict__['__setup']('setup_test_name')
 
-    self.assertEqual(log_level, nxlog.LOG_ERR)
+        log_level = nxlog.__dict__['__level']
 
-    os.unsetenv('LOG_LEVEL')
+        self.assertEqual(log_level, nxlog.LOG_ERR)
 
-  def testLogLevelSet(self):
-    """Test that the log level has been set to a valid value"""
+        os.unsetenv('LOG_LEVEL')
 
-    # Ensure that before set_log_level has been called, the internal value
-    # of log level is sane.
-    log_level = nxlog.__dict__['__level']
+    def testLogLevelSet(self):
+        """Test that the log level has been set to a valid value"""
 
-    self.failUnless(log_level in [nxlog.LOG_EMERG, nxlog.LOG_ALERT,
-                                  nxlog.LOG_CRIT, nxlog.LOG_ERR,
-                                  nxlog.LOG_WARNING, nxlog.LOG_NOTICE,
-                                  nxlog.LOG_INFO, nxlog.LOG_DEBUG])
+        # Ensure that before set_log_level has been called, the internal value
+        # of log level is sane.
+        log_level = nxlog.__dict__['__level']
 
-  def testLog(self):
-    """Test calling log function"""
+        self.failUnless(log_level in [nxlog.LOG_EMERG, nxlog.LOG_ALERT,
+                                      nxlog.LOG_CRIT, nxlog.LOG_ERR,
+                                      nxlog.LOG_WARNING, nxlog.LOG_NOTICE,
+                                      nxlog.LOG_INFO, nxlog.LOG_DEBUG])
 
-    nxlog.log(0, 'test log message')
+    def testLog(self):
+        """Test calling log function"""
 
-  def testSetup(self):
-    """Test calling external setup()"""
+        nxlog.log(0, 'test log message')
 
-    nxlog.setup('nxlog_test')
+    def testSetup(self):
+        """Test calling external setup()"""
 
-  def testSetLogLevel(self):
-    """Test the code path through set_log_level() with a valid level"""
+        nxlog.setup('nxlog_test')
 
-    nxlog.set_log_level(nxlog.LOG_INFO)
+    def testSetLogLevel(self):
+        """Test the code path through set_log_level() with a valid level"""
 
-  def testSetLogLevelRaises(self):
-    """Test the code path through set_log_level() with an invalid level"""
+        nxlog.set_log_level(nxlog.LOG_INFO)
 
-    self.assertRaises(ValueError, nxlog.set_log_level, 'not_a_level')
+    def testSetLogLevelRaises(self):
+        """Test the code path through set_log_level() with an invalid level"""
 
-  def testNameToLevelNameString(self):
-    """Test calling _name_to_level with a string specifying a level"""
+        self.assertRaises(ValueError, nxlog.set_log_level, 'not_a_level')
 
-    self.assertEquals(nxlog.LOG_DEBUG, nxlog._name_to_level('DEBUG'))
+    def testNameToLevelNameString(self):
+        """Test calling _name_to_level with a string specifying a level"""
 
-  def testNametoLevelNumberString(self):
-    """Test calling _name_to_level() with an integer represented as a string"""
+        self.assertEquals(nxlog.LOG_DEBUG, nxlog._name_to_level('DEBUG'))
 
-    self.assertEquals(nxlog.LOG_DEBUG, nxlog._name_to_level('7'))
+    def testNametoLevelNumberString(self):
+        """Test calling _name_to_level() with an integer represented as a string"""
 
-  def testNametoLevelInteger(self):
-    """Test calling _name_to_level() with an integer."""
+        self.assertEquals(nxlog.LOG_DEBUG, nxlog._name_to_level('7'))
 
-    self.assertEquals(nxlog.LOG_DEBUG, nxlog._name_to_level(nxlog.LOG_DEBUG))
+    def testNametoLevelInteger(self):
+        """Test calling _name_to_level() with an integer."""
 
-  def testNametoLevelInvalidNameString(self):
-    """Test calling _name_to_level() on a meaningless string."""
+        self.assertEquals(
+            nxlog.LOG_DEBUG, nxlog._name_to_level(nxlog.LOG_DEBUG))
 
-    self.assertRaises(ValueError, nxlog._name_to_level, 'BLARG')
+    def testNametoLevelInvalidNameString(self):
+        """Test calling _name_to_level() on a meaningless string."""
+
+        self.assertRaises(ValueError, nxlog._name_to_level, 'BLARG')
 
 
 if __name__ == '__main__':
-  unittest.main()
+    unittest.main()

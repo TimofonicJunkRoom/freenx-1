@@ -21,15 +21,19 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 # i18n will come!
-def _ (x):
+
+
+def _(x):
     return x
 
 import os
 from nxsession import NXSession
 
-HOME = os.getenv ('HOME')
+HOME = os.getenv('HOME')
+
 
 class NXConfig:
+
     """
     NXConfig (name)
 
@@ -49,7 +53,7 @@ class NXConfig:
 
     """
 
-    def __init__ (self, name = None):
+    def __init__(self, name=None):
         # for use with configuration frontends
         self.modified = False
 
@@ -62,25 +66,25 @@ class NXConfig:
         self.session = None
 
         if name:
-            self._load (name)
+            self._load(name)
 
-    def _load (self, name):
+    def _load(self, name):
         self.name = name
-        self.session = NXSession (name, 'unix-gnome')
-        
+        self.session = NXSession(name, 'unix-gnome')
+
         # FIXME: this can be failing for reasons other than the
         # file not existing
         try:
-            f = open ('%s/.gnx/%s' % (HOME, name))
-            lines = f.readlines ()
-            f.close ()
+            f = open('%s/.gnx/%s' % (HOME, name))
+            lines = f.readlines()
+            f.close()
         except IOError:
             return
-        
+
         conf = {}
         for line in lines:
-            key, value = line.split ('=')
-            conf[key] = value.strip ()
+            key, value = line.split('=')
+            conf[key] = value.strip()
 
         self.host = conf['host']
         self.port = int(conf['port'])
@@ -91,27 +95,27 @@ class NXConfig:
         self.session.stype = conf['type']
         self.session.geometry = conf['geometry']
 
-    def save (self):
+    def save(self):
         session = self.session
         name = self.name
 
-        f = open ('%s/.gnx/%s' % (HOME, name), 'w')
+        f = open('%s/.gnx/%s' % (HOME, name), 'w')
 
-        f.write ('host=%s\n' % (self.host))
-        f.write ('port=%s\n' % (self.port))
-        f.write ('username=%s\n' % (self.username))
-        f.write ('password=%s\n' % (self.password))
-        f.write ('sshkey=%s\n' % (self.sshkey))
+        f.write('host=%s\n' % (self.host))
+        f.write('port=%s\n' % (self.port))
+        f.write('username=%s\n' % (self.username))
+        f.write('password=%s\n' % (self.password))
+        f.write('sshkey=%s\n' % (self.sshkey))
 
-        f.write ('type=%s\n' % (session.stype))
-        f.write ('cache=%s\n' % (session.cache))
-        f.write ('images_cache=%s\n' % (session.images_cache))
-        f.write ('link=%s\n' % (session.link))
-        f.write ('geometry=%s\n' % (session.geometry))
+        f.write('type=%s\n' % (session.stype))
+        f.write('cache=%s\n' % (session.cache))
+        f.write('images_cache=%s\n' % (session.images_cache))
+        f.write('link=%s\n' % (session.link))
+        f.write('geometry=%s\n' % (session.geometry))
 
-        f.close ()
-    
+        f.close()
+
 if __name__ == '__main__':
-    nc = NXConfig ('gnome_local')
+    nc = NXConfig('gnome_local')
     nc.session.name = 'bleh'
-    nc.save ()
+    nc.save()

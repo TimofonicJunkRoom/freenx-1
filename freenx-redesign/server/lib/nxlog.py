@@ -62,166 +62,164 @@ _level_names = {
     'NOTICE': LOG_NOTICE,
     'INFO': LOG_INFO,
     'DEBUG': LOG_DEBUG
-  }
-
+}
 
 
 def __setup_syslog(name):
-  """Initialize logging to the syslog.
-  
-  Args:
-    name: The name to be used for the logging facility.
+    """Initialize logging to the syslog.
 
-  Returns:
-    None
-  """
+    Args:
+      name: The name to be used for the logging facility.
 
-  syslog.openlog(name, syslog.LOG_PID)
+    Returns:
+      None
+    """
+
+    syslog.openlog(name, syslog.LOG_PID)
 
 
 def __log_syslog(level, message):
-  """Write a message to syslog.
+    """Write a message to syslog.
 
-  Args:
-    level: Number giving the level of this message.
-    message: String giving the message to be logged.
+    Args:
+      level: Number giving the level of this message.
+      message: String giving the message to be logged.
 
-  Returns:
-    None
-  """
+    Returns:
+      None
+    """
 
-  syslog.syslog(level, message)
+    syslog.syslog(level, message)
 
 
 def __setup_stderr(name):
-  """Initialize loggin to stderr.
-  
-  Args:
-    name: The name to be used for the logging facility.
+    """Initialize loggin to stderr.
 
-  Returns:
-    None
-  """
-  global __stderr_name
+    Args:
+      name: The name to be used for the logging facility.
 
-  __stderr_name = name
+    Returns:
+      None
+    """
+    global __stderr_name
+
+    __stderr_name = name
 
 
 def __log_stderr(level, message):
-  """Write a message to stderr.
+    """Write a message to stderr.
 
-  Args:
-    level: Number giving the level of this message.
-    message: String giving the message to be logged.
+    Args:
+      level: Number giving the level of this message.
+      message: String giving the message to be logged.
 
-  Returns:
-    None
-  """
-  global __stderr_name
-  global __level
+    Returns:
+      None
+    """
+    global __stderr_name
+    global __level
 
-  if level <= __level:
-    sys.stderr.write('%s: %s' % (__stderr_name, message))
+    if level <= __level:
+        sys.stderr.write('%s: %s' % (__stderr_name, message))
 
 
 def __setup(name):
-  """Set up the library.
-  
-  Args:
-    name: The name to be used for the logging facility.
+    """Set up the library.
 
-  Returns:
-    None
-  """
-  global __level
+    Args:
+      name: The name to be used for the logging facility.
 
-  level = os.getenv('LOG_LEVEL')
-  if level is not None:
-    __level = _name_to_level(level)
+    Returns:
+      None
+    """
+    global __level
 
-  __setup_syslog(name)
-  __handlers.append(__log_syslog)
+    level = os.getenv('LOG_LEVEL')
+    if level is not None:
+        __level = _name_to_level(level)
+
+    __setup_syslog(name)
+    __handlers.append(__log_syslog)
 
 #  __setup_stderr(name)
 #  __handlers.append(__log_stderr)
 
 
 def setup(name):
-  """Set the facility name for logging.
+    """Set the facility name for logging.
 
-  Note: this can be called multiple times, to change the name.
+    Note: this can be called multiple times, to change the name.
 
-  Args:
-    name: The name to be used for the logging facility.
+    Args:
+      name: The name to be used for the logging facility.
 
-  Returns:
-    None
-  """
+    Returns:
+      None
+    """
 
-  __setup_syslog(name)
-  __setup_stderr(name)
-  
+    __setup_syslog(name)
+    __setup_stderr(name)
+
 
 def set_log_level(level):
-  """Set the log level.
+    """Set the log level.
 
-  Args:
-    level: Number giving the highest level to log at.
+    Args:
+      level: Number giving the highest level to log at.
 
-  Returns:
-    None
-  """
-  global __level
+    Returns:
+      None
+    """
+    global __level
 
-  __level = _name_to_level(level)
+    __level = _name_to_level(level)
 
 
 def log(level, message):
-  """Handle a log message with a given level.
+    """Handle a log message with a given level.
 
-  If the message is high enough level to be written, pass it to the
-  configured log channels.
+    If the message is high enough level to be written, pass it to the
+    configured log channels.
 
-  Args:
-    level: Integer or string giving the level of this message.
-    message: String giving the message to be logged.
+    Args:
+      level: Integer or string giving the level of this message.
+      message: String giving the message to be logged.
 
-  Returns:
-    None
-  """
-  global __level
+    Returns:
+      None
+    """
+    global __level
 
-  lev_num = _name_to_level(level)
+    lev_num = _name_to_level(level)
 
-  if lev_num <= __level:
-    for handler in __handlers:
-      handler(lev_num, message)
+    if lev_num <= __level:
+        for handler in __handlers:
+            handler(lev_num, message)
 
 
 def _name_to_level(level):
-  """Translate from level number or name to log level
+    """Translate from level number or name to log level
 
-  Args:
-    level: Integer, number string, or name string for log level
+    Args:
+      level: Integer, number string, or name string for log level
 
-  Returns:
-    The corresponding log level
-  """
-  try:
-    return int(level)
-  except ValueError:
-    pass
-  # The value is not a number
-  try:
-    return _level_names[level]
-  except KeyError:
-    # ValueError makes more sense to raise for an invalid name
-    raise ValueError('invalid name for log level: %s' % level)
+    Returns:
+      The corresponding log level
+    """
+    try:
+        return int(level)
+    except ValueError:
+        pass
+    # The value is not a number
+    try:
+        return _level_names[level]
+    except KeyError:
+        # ValueError makes more sense to raise for an invalid name
+        raise ValueError('invalid name for log level: %s' % level)
 
 
 if __name__ == '__main__':
-  print 'This is a library. Please use it from python using import.'
-  sys.exit(0)
+    print 'This is a library. Please use it from python using import.'
+    sys.exit(0)
 else:
-  __setup(__name__)
-
+    __setup(__name__)

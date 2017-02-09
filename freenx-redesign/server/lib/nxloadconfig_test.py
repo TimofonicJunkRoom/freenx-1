@@ -33,85 +33,87 @@ nxlog.setup("nxloadconfig_test")
 
 
 class NXLoadConifgUnitTest(unittest.TestCase):
-  """Unit test for nxloadconfig module."""
 
-  def setUp(self):
-    # Not actually needed for every test, but it handy to have.
-    self.conf = nxloadconfig.conf
-    self.orig_conf = copy.copy(self.conf)
+    """Unit test for nxloadconfig module."""
 
-  def tearDown(self):
-    # Cleanup after ourselves. See note on setUp()
-    nxloadconfig.copy = copy.copy(self.orig_conf)
+    def setUp(self):
+        # Not actually needed for every test, but it handy to have.
+        self.conf = nxloadconfig.conf
+        self.orig_conf = copy.copy(self.conf)
 
-  def testWhich(self):
-    self.assertEquals('/bin/bash', nxloadconfig.which("bash"))
-    self.assertEquals('', nxloadconfig.which("somethingwhichdoesntexist"))
+    def tearDown(self):
+        # Cleanup after ourselves. See note on setUp()
+        nxloadconfig.copy = copy.copy(self.orig_conf)
 
-  def testCheckCommandVar(self):
-    # Var is unset, default value is valid
-    if 'TEST' in self.conf: del self.conf['TEST']
-    ret = nxloadconfig.check_command_var("TEST", "/bin/bash")
-    self.assertEquals(True, ret)
-    self.assertEquals("/bin/bash", self.conf['TEST'])
+    def testWhich(self):
+        self.assertEquals('/bin/bash', nxloadconfig.which("bash"))
+        self.assertEquals('', nxloadconfig.which("somethingwhichdoesntexist"))
 
-    # Var points to unexecutable file, default value is valid.
-    nxloadconfig.copy = copy.copy(self.orig_conf)
-    self.conf['TEST'] = '/etc/fstab'
-    ret = nxloadconfig.check_command_var("TEST", "/bin/bash")
-    self.assertEquals(True, ret)
-    self.assertEquals("/bin/bash", self.conf['TEST'])
+    def testCheckCommandVar(self):
+        # Var is unset, default value is valid
+        if 'TEST' in self.conf:
+            del self.conf['TEST']
+        ret = nxloadconfig.check_command_var("TEST", "/bin/bash")
+        self.assertEquals(True, ret)
+        self.assertEquals("/bin/bash", self.conf['TEST'])
 
-    # Var points to executable dir, default value is valid.
-    nxloadconfig.copy = copy.copy(self.orig_conf)
-    self.conf['TEST'] = '/bin'
-    ret = nxloadconfig.check_command_var("TEST", "/bin/bash")
-    self.assertEquals(True, ret)
-    self.assertEquals("/bin/bash", self.conf['TEST'])
+        # Var points to unexecutable file, default value is valid.
+        nxloadconfig.copy = copy.copy(self.orig_conf)
+        self.conf['TEST'] = '/etc/fstab'
+        ret = nxloadconfig.check_command_var("TEST", "/bin/bash")
+        self.assertEquals(True, ret)
+        self.assertEquals("/bin/bash", self.conf['TEST'])
 
-    # Test valid value with valid default
-    nxloadconfig.copy = copy.copy(self.orig_conf)
-    self.conf['TEST'] = '/bin/sh'
-    ret = nxloadconfig.check_command_var("TEST", "/bin/bash")
-    self.assertEquals(True, ret)
-    self.assertEquals("/bin/sh", self.conf['TEST'])
+        # Var points to executable dir, default value is valid.
+        nxloadconfig.copy = copy.copy(self.orig_conf)
+        self.conf['TEST'] = '/bin'
+        ret = nxloadconfig.check_command_var("TEST", "/bin/bash")
+        self.assertEquals(True, ret)
+        self.assertEquals("/bin/bash", self.conf['TEST'])
 
-    # Test invalid value with invalid default
-    nxloadconfig.copy = copy.copy(self.orig_conf)
-    self.conf['TEST'] = '/etc/fstab'
-    ret = nxloadconfig.check_command_var("TEST", "/etc/hosts")
-    self.assertEquals(False, ret)
-    self.assertEquals("/etc/fstab", self.conf['TEST'])
+        # Test valid value with valid default
+        nxloadconfig.copy = copy.copy(self.orig_conf)
+        self.conf['TEST'] = '/bin/sh'
+        ret = nxloadconfig.check_command_var("TEST", "/bin/bash")
+        self.assertEquals(True, ret)
+        self.assertEquals("/bin/sh", self.conf['TEST'])
 
+        # Test invalid value with invalid default
+        nxloadconfig.copy = copy.copy(self.orig_conf)
+        self.conf['TEST'] = '/etc/fstab'
+        ret = nxloadconfig.check_command_var("TEST", "/etc/hosts")
+        self.assertEquals(False, ret)
+        self.assertEquals("/etc/fstab", self.conf['TEST'])
 
-  def testCheckDirVar(self):
-    # Var is unset, default value is valid
-    if 'TEST' in self.conf: del self.conf['TEST']
-    ret = nxloadconfig.check_dir_var("TEST", "/bin")
-    self.assertEquals(True, ret)
-    self.assertEquals("/bin", self.conf['TEST'])
+    def testCheckDirVar(self):
+        # Var is unset, default value is valid
+        if 'TEST' in self.conf:
+            del self.conf['TEST']
+        ret = nxloadconfig.check_dir_var("TEST", "/bin")
+        self.assertEquals(True, ret)
+        self.assertEquals("/bin", self.conf['TEST'])
 
-    # Var points to file, default value is valid.
-    nxloadconfig.copy = copy.copy(self.orig_conf)
-    self.conf['TEST'] = '/etc/fstab'
-    ret = nxloadconfig.check_dir_var("TEST", "/bin")
-    self.assertEquals(True, ret)
-    self.assertEquals("/bin", self.conf['TEST'])
+        # Var points to file, default value is valid.
+        nxloadconfig.copy = copy.copy(self.orig_conf)
+        self.conf['TEST'] = '/etc/fstab'
+        ret = nxloadconfig.check_dir_var("TEST", "/bin")
+        self.assertEquals(True, ret)
+        self.assertEquals("/bin", self.conf['TEST'])
 
-    # Test valid value with valid default
-    nxloadconfig.copy = copy.copy(self.orig_conf)
-    self.conf['TEST'] = '/bin'
-    ret = nxloadconfig.check_dir_var("TEST", "/usr")
-    self.assertEquals(True, ret)
-    self.assertEquals("/bin", self.conf['TEST'])
+        # Test valid value with valid default
+        nxloadconfig.copy = copy.copy(self.orig_conf)
+        self.conf['TEST'] = '/bin'
+        ret = nxloadconfig.check_dir_var("TEST", "/usr")
+        self.assertEquals(True, ret)
+        self.assertEquals("/bin", self.conf['TEST'])
 
-    # Test invalid value with invalid default
-    nxloadconfig.copy = copy.copy(self.orig_conf)
-    self.conf['TEST'] = '/etc/fstab'
-    ret = nxloadconfig.check_dir_var("TEST", "/etc/hosts")
-    self.assertEquals(False, ret)
-    self.assertEquals("/etc/fstab", self.conf['TEST'])
+        # Test invalid value with invalid default
+        nxloadconfig.copy = copy.copy(self.orig_conf)
+        self.conf['TEST'] = '/etc/fstab'
+        ret = nxloadconfig.check_dir_var("TEST", "/etc/hosts")
+        self.assertEquals(False, ret)
+        self.assertEquals("/etc/fstab", self.conf['TEST'])
 
 
 if __name__ == '__main__':
-  unittest.main()
+    unittest.main()

@@ -35,190 +35,193 @@ __copyright__ = 'Copyright 2008 Google Inc. All rights reserved.'
 
 
 class GlobalsTest(unittest.TestCase):
-  """Unit test for global variables in nxsession"""
 
-  def testStateNames(self):
-    """Test state names is not empty"""
+    """Unit test for global variables in nxsession"""
 
-    self.failUnless(nxsession.state_names)
+    def testStateNames(self):
+        """Test state names is not empty"""
 
-  def testDefaultParams(self):
-    """Test that default params is not empty"""
+        self.failUnless(nxsession.state_names)
 
-    # In later tests we use the contents without bounds checking
-    # This is a canary to making those tests easier to debug if
-    # something changes.
-    self.failUnless(nxsession.default_params)
+    def testDefaultParams(self):
+        """Test that default params is not empty"""
+
+        # In later tests we use the contents without bounds checking
+        # This is a canary to making those tests easier to debug if
+        # something changes.
+        self.failUnless(nxsession.default_params)
 
 
 class GenUniqIdTest(unittest.TestCase):
-  """Unit test for nxsession.gen_uniq_id"""
 
-  def testGetUniqId(self):
-    """Test case for nxsession.gen_uniq_id function"""
+    """Unit test for nxsession.gen_uniq_id"""
 
-    self.failUnless(nxsession.gen_uniq_id())
+    def testGetUniqId(self):
+        """Test case for nxsession.gen_uniq_id function"""
 
-  def testGetUniqIdUniq(self):
-    """Test case for nxsession.gen_uniq_id to ensure ID is unique"""
+        self.failUnless(nxsession.gen_uniq_id())
 
-    first = nxsession.gen_uniq_id()
+    def testGetUniqIdUniq(self):
+        """Test case for nxsession.gen_uniq_id to ensure ID is unique"""
 
-    time.sleep(1)
+        first = nxsession.gen_uniq_id()
 
-    second = nxsession.gen_uniq_id()
+        time.sleep(1)
 
-    self.assertNotEqual(first, second)
+        second = nxsession.gen_uniq_id()
+
+        self.assertNotEqual(first, second)
 
 
 class NXSessionUnitTest(unittest.TestCase):
-  """Unit test for nxsession.nxsession"""
 
-  def setUp(self): pass
+    """Unit test for nxsession.nxsession"""
 
-  def tearDown(self): pass
+    def setUp(self): pass
 
-  def testConstructor(self):
-    """Test calling the nxsession constructor"""
+    def tearDown(self): pass
 
-    nxsession.nxsession('')
+    def testConstructor(self):
+        """Test calling the nxsession constructor"""
 
-  def testConstructorBadParams(self):
-    """Test calling the nxsession constructor with params containing no ="""
+        nxsession.nxsession('')
 
-    self.assertRaises(ValueError, nxsession.nxsession, 'foo')
+    def testConstructorBadParams(self):
+        """Test calling the nxsession constructor with params containing no ="""
 
-  def testConstructorUnknownParams(self):
-    """Test calling the nxsession constructor with param not in defaults"""
+        self.assertRaises(ValueError, nxsession.nxsession, 'foo')
 
-    nxsession.nxsession('foo=bar')
+    def testConstructorUnknownParams(self):
+        """Test calling the nxsession constructor with param not in defaults"""
 
-  def testConstructorGoodParam(self):
-    """Test calling the nxsession constructor with param which is ok"""
+        nxsession.nxsession('foo=bar')
 
-    key = nxsession.default_params.keys()[0]
+    def testConstructorGoodParam(self):
+        """Test calling the nxsession constructor with param which is ok"""
 
-    nxsession.nxsession('%s=bar' % key)
+        key = nxsession.default_params.keys()[0]
 
-  def testConstructorSetsUpId(self):
-    """Test an ID parameter is set up by the constructor"""
+        nxsession.nxsession('%s=bar' % key)
 
-    o = nxsession.nxsession('')
+    def testConstructorSetsUpId(self):
+        """Test an ID parameter is set up by the constructor"""
 
-    self.failUnless('id' in o.params)
+        o = nxsession.nxsession('')
 
-  def testConstructorSetsUpId(self):
-    """Test a default ID parameter is set up by the constructor"""
+        self.failUnless('id' in o.params)
 
-    o = nxsession.nxsession('')
+    def testConstructorSetsUpId(self):
+        """Test a default ID parameter is set up by the constructor"""
 
-    self.failUnless('id' in o.params)
+        o = nxsession.nxsession('')
 
-  def testConstructorAcceptsId(self):
-    """Test an ID parameter is accepted in those passed to constructor"""
+        self.failUnless('id' in o.params)
 
-    id = '23'
+    def testConstructorAcceptsId(self):
+        """Test an ID parameter is accepted in those passed to constructor"""
 
-    o = nxsession.nxsession('id=%s' % id)
+        id = '23'
 
-    self.assertEquals(id, o.params['id'])
+        o = nxsession.nxsession('id=%s' % id)
 
-  def testConstructorPopulatesFullId(self):
-    """Test a full_id parameter is set up by the constructor"""
+        self.assertEquals(id, o.params['id'])
 
-    o = nxsession.nxsession('')
+    def testConstructorPopulatesFullId(self):
+        """Test a full_id parameter is set up by the constructor"""
 
-    self.failUnless('full_id' in o.params)
+        o = nxsession.nxsession('')
 
-  def testConstructorPopulatesReplacesId(self):
-    """Test a full_id parameter provided in vars is overriden"""
+        self.failUnless('full_id' in o.params)
 
-    test_full_id = 'hostname-1-ID'
+    def testConstructorPopulatesReplacesId(self):
+        """Test a full_id parameter provided in vars is overriden"""
 
-    o = nxsession.nxsession('full_id=%s' % test_full_id)
+        test_full_id = 'hostname-1-ID'
 
-    self.failUnless('full_id' in o.params)
-    self.assertNotEqual(o.params['full_id'], test_full_id)
+        o = nxsession.nxsession('full_id=%s' % test_full_id)
 
-  def testConstructorPopulatesCookie(self):
-    """Test a cookie parameter is set up"""
+        self.failUnless('full_id' in o.params)
+        self.assertNotEqual(o.params['full_id'], test_full_id)
 
-    o = nxsession.nxsession('')
+    def testConstructorPopulatesCookie(self):
+        """Test a cookie parameter is set up"""
 
-    self.failUnless('cookie' in o.params)
+        o = nxsession.nxsession('')
 
-  def testConstructorCookieIsUniqId(self):
+        self.failUnless('cookie' in o.params)
 
-    old_id = nxsession.gen_uniq_id()
+    def testConstructorCookieIsUniqId(self):
 
-    time.sleep(1)
+        old_id = nxsession.gen_uniq_id()
 
-    # Make sure the id from the generator is now different
-    self.assertNotEqual(old_id, nxsession.gen_uniq_id())
+        time.sleep(1)
 
-    o = nxsession.nxsession('')
+        # Make sure the id from the generator is now different
+        self.assertNotEqual(old_id, nxsession.gen_uniq_id())
 
-    self.failUnless('cookie' in o.params)
-    self.assertNotEqual(old_id, o.params['cookie'])
+        o = nxsession.nxsession('')
 
-  def testConstructorAcceptsCookie(self):
-    """Test a cookie paramete is read from vars"""
+        self.failUnless('cookie' in o.params)
+        self.assertNotEqual(old_id, o.params['cookie'])
 
-    cookie = nxsession.gen_uniq_id()
+    def testConstructorAcceptsCookie(self):
+        """Test a cookie paramete is read from vars"""
 
-    time.sleep(1)
+        cookie = nxsession.gen_uniq_id()
 
-    # Make sure the id from the generator is now different
-    self.assertNotEqual(cookie, nxsession.gen_uniq_id())
+        time.sleep(1)
 
-    o = nxsession.nxsession('cookie=%s' % cookie)
+        # Make sure the id from the generator is now different
+        self.assertNotEqual(cookie, nxsession.gen_uniq_id())
 
-    self.failUnless('cookie' in o.params)
-    self.assertEqual(cookie, o.params['cookie'])
-    
-  def testConstructorSetUser(self):
-    """Test a user parameter is set by constructor"""
+        o = nxsession.nxsession('cookie=%s' % cookie)
 
-    o = nxsession.nxsession('')
+        self.failUnless('cookie' in o.params)
+        self.assertEqual(cookie, o.params['cookie'])
 
-    self.failUnless('user' in o.params)
+    def testConstructorSetUser(self):
+        """Test a user parameter is set by constructor"""
 
-  def testConstructorAcceptsUser(self):
-    """Test a user paramater specified in vars is not replaced"""
+        o = nxsession.nxsession('')
 
-    username = 'dummy_user'
+        self.failUnless('user' in o.params)
 
-    o = nxsession.nxsession('user=%s' % username)
+    def testConstructorAcceptsUser(self):
+        """Test a user paramater specified in vars is not replaced"""
 
-    self.failUnless('user' in o.params)
-    self.assertEquals(username, o.params['user'])
+        username = 'dummy_user'
 
-  def testSetState(self):
-    """Test setting state on a session"""
+        o = nxsession.nxsession('user=%s' % username)
 
-    o = nxsession.nxsession('')
+        self.failUnless('user' in o.params)
+        self.assertEquals(username, o.params['user'])
 
-    o.set_state(nxsession.state_names[0])
+    def testSetState(self):
+        """Test setting state on a session"""
 
-  def testSetStateAllStates(self):
+        o = nxsession.nxsession('')
 
-    o = nxsession.nxsession('')
+        o.set_state(nxsession.state_names[0])
 
-    for state in nxsession.state_names:
+    def testSetStateAllStates(self):
 
-      o.set_state(state)
+        o = nxsession.nxsession('')
 
-      self.assertEquals(o.params['state'], state)
+        for state in nxsession.state_names:
 
-  def testSetInvalidState(self):
+            o.set_state(state)
 
-    o = nxsession.nxsession('')
+            self.assertEquals(o.params['state'], state)
 
-    state = 'invalud_state_name'
+    def testSetInvalidState(self):
 
-    o.set_state(state)
+        o = nxsession.nxsession('')
 
-    self.assertNotEquals(o.params['state'], state)
+        state = 'invalud_state_name'
+
+        o.set_state(state)
+
+        self.assertNotEquals(o.params['state'], state)
 
 if __name__ == '__main__':
-  unittest.main()
+    unittest.main()

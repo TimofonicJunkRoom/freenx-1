@@ -33,345 +33,351 @@ import nxparser.base
 __author__ = 'diamond@google.com (Stephen Shirley)'
 __copyright__ = 'Copyright 2008 Google Inc.'
 
+
 class NxParserBaseUnitTest(unittest.TestCase):
 
-  class MockStringIO(StringIO.StringIO):
-    """Mock file object to check to log what's written and whether it's flushed"""
+    class MockStringIO(StringIO.StringIO):
 
-    def __init__(self, buf=None):
-      if buf:
-        StringIO.StringIO.__init__(self, buf)
-      else:
-        StringIO.StringIO.__init__(self)
-      self.flushed = False
+        """Mock file object to check to log what's written and whether it's flushed"""
 
-    def flush(self):
-      StringIO.StringIO.flush(self)
-      self.flushed = True
+        def __init__(self, buf=None):
+            if buf:
+                StringIO.StringIO.__init__(self, buf)
+            else:
+                StringIO.StringIO.__init__(self)
+            self.flushed = False
 
-  def MockLog(self, *args):
-    """Mock logging function to replace nxlog.log and store all arguments"""
+        def flush(self):
+            StringIO.StringIO.flush(self)
+            self.flushed = True
 
-    self.logged_data.append(args)
+    def MockLog(self, *args):
+        """Mock logging function to replace nxlog.log and store all arguments"""
 
-  def MockLogFlush(self, *args):
-    """Wipe the MockLog() history"""
+        self.logged_data.append(args)
 
-    self.logged_data = []
+    def MockLogFlush(self, *args):
+        """Wipe the MockLog() history"""
 
-  def utilCheckInitialAttributes(self, p, input, output, version, program):
-    """Check if the nxparser.base instance has initialised correctly"""
+        self.logged_data = []
 
-    self.assertEquals(input, p.input)
-    self.assertEquals(output, p.output)
-    self.assertEquals(105, p.state)
-    self.assertEquals(True, p.running)
-    self.assertEquals(version, p.version)
-    self.assertEquals(program, p.program)
-    self.assertEquals((nxlog.LOG_DEBUG,
-      "Version: %(version)s Program: %(program)s" % locals()),
-      self.logged_data.pop(0))
-    self.assertEquals([], self.logged_data)
+    def utilCheckInitialAttributes(self, p, input, output, version, program):
+        """Check if the nxparser.base instance has initialised correctly"""
 
-  def utilCheckOutput(self, out, exp_output, flush=True, log=True,
-      log_level=nxlog.LOG_DEBUG):
-    """Check if output has been written, flushed, and/or logged"""
+        self.assertEquals(input, p.input)
+        self.assertEquals(output, p.output)
+        self.assertEquals(105, p.state)
+        self.assertEquals(True, p.running)
+        self.assertEquals(version, p.version)
+        self.assertEquals(program, p.program)
+        self.assertEquals((nxlog.LOG_DEBUG,
+                           "Version: %(version)s Program: %(program)s" % locals()),
+                          self.logged_data.pop(0))
+        self.assertEquals([], self.logged_data)
 
-    self.assertEquals(exp_output, out.getvalue())
-    if flush:
-      self.assertEquals(flush, out.flushed)
-    if log:
-      self.assertEquals((log_level, "Sent: %(exp_output)r\n" % locals()),
-        self.logged_data.pop(0))
-    else:
-      self.assertEquals(0, len(self.logged_data))
+    def utilCheckOutput(self, out, exp_output, flush=True, log=True,
+                        log_level=nxlog.LOG_DEBUG):
+        """Check if output has been written, flushed, and/or logged"""
 
-  def setUp(self):
-    """Before every test substitute Mocklog for nxlog.log"""
+        self.assertEquals(exp_output, out.getvalue())
+        if flush:
+            self.assertEquals(flush, out.flushed)
+        if log:
+            self.assertEquals((log_level, "Sent: %(exp_output)r\n" % locals()),
+                              self.logged_data.pop(0))
+        else:
+            self.assertEquals(0, len(self.logged_data))
 
-    self.nxlog_log_old = nxlog.log
-    nxlog.log = self.MockLog
-    self.MockLogFlush()
+    def setUp(self):
+        """Before every test substitute Mocklog for nxlog.log"""
 
-  def tearDown(self):
-    """Restore the original nxlog.log"""
+        self.nxlog_log_old = nxlog.log
+        nxlog.log = self.MockLog
+        self.MockLogFlush()
 
-    nxlog.log = self.nxlog_log_old
+    def tearDown(self):
+        """Restore the original nxlog.log"""
 
-  def testInitDefaults(self):
-    """Does an instance with default args initialise correctly?"""
+        nxlog.log = self.nxlog_log_old
 
-    p = nxparser.base.parser(sys.stdin, sys.stdout)
+    def testInitDefaults(self):
+        """Does an instance with default args initialise correctly?"""
 
-    self.utilCheckInitialAttributes(p, sys.stdin, sys.stdout, p.DEFAULT_VERSION,
-      p.DEFAULT_PROGRAM)
+        p = nxparser.base.parser(sys.stdin, sys.stdout)
 
-  def testInitVersion(self):
-    """Does an instance with an overridden version string initialise correctly?"""
+        self.utilCheckInitialAttributes(
+            p, sys.stdin, sys.stdout, p.DEFAULT_VERSION,
+          p.DEFAULT_PROGRAM)
 
-    ver_name = "testverstring"
-    p = nxparser.base.parser(sys.stdin, sys.stdout, version=ver_name)
+    def testInitVersion(self):
+        """Does an instance with an overridden version string initialise correctly?"""
 
-    self.utilCheckInitialAttributes(p, sys.stdin, sys.stdout, ver_name,
-      p.DEFAULT_PROGRAM)
+        ver_name = "testverstring"
+        p = nxparser.base.parser(sys.stdin, sys.stdout, version=ver_name)
 
-  def testInitProgram(self):
-    """Does an instance with an overridden program name initialise correctly?"""
+        self.utilCheckInitialAttributes(p, sys.stdin, sys.stdout, ver_name,
+                                        p.DEFAULT_PROGRAM)
 
-    prog_name = "testprogstring"
-    p = nxparser.base.parser(sys.stdin, sys.stdout, program=prog_name)
+    def testInitProgram(self):
+        """Does an instance with an overridden program name initialise correctly?"""
 
-    self.utilCheckInitialAttributes(p, sys.stdin, sys.stdout, p.DEFAULT_VERSION,
-      prog_name)
+        prog_name = "testprogstring"
+        p = nxparser.base.parser(sys.stdin, sys.stdout, program=prog_name)
 
-  def testInitVersionProgram(self):
-    """Does an instance with an overridden program name and version string
-    initialise correctly?"""
+        self.utilCheckInitialAttributes(
+            p, sys.stdin, sys.stdout, p.DEFAULT_VERSION,
+          prog_name)
 
-    ver_name = "testverstring"
-    prog_name = "testprogstring"
-    p = nxparser.base.parser(sys.stdin, sys.stdout,
-        version=ver_name, program=prog_name)
+    def testInitVersionProgram(self):
+        """Does an instance with an overridden program name and version string
+        initialise correctly?"""
 
-    self.utilCheckInitialAttributes(p, sys.stdin, sys.stdout, ver_name, prog_name)
+        ver_name = "testverstring"
+        prog_name = "testprogstring"
+        p = nxparser.base.parser(sys.stdin, sys.stdout,
+                                 version=ver_name, program=prog_name)
 
-  def testBannerDefaults(self):
-    """Does base.banner() output correctly with no arguments?"""
+        self.utilCheckInitialAttributes(
+            p, sys.stdin, sys.stdout, ver_name, prog_name)
 
-    out = self.MockStringIO()
-    exp_output = "HELLO NXBASE - Version 3.0.0 - GPL\n"
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testBannerDefaults(self):
+        """Does base.banner() output correctly with no arguments?"""
 
-    p.banner()
+        out = self.MockStringIO()
+        exp_output = "HELLO NXBASE - Version 3.0.0 - GPL\n"
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-    self.utilCheckOutput(out, exp_output)
+        p.banner()
 
-  def testBannerVersionProgram(self):
-    """Does base.banner() output correctly with a specified version string
-    and program name?"""
+        self.utilCheckOutput(out, exp_output)
 
-    ver_name = "testverstring"
-    prog_name = "testprogstring"
-    exp_output = "HELLO %(prog_name)s - Version %(ver_name)s - GPL\n" % locals()
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out,
-        version=ver_name, program=prog_name)
-    self.MockLogFlush()
+    def testBannerVersionProgram(self):
+        """Does base.banner() output correctly with a specified version string
+        and program name?"""
 
-    p.banner()
+        ver_name = "testverstring"
+        prog_name = "testprogstring"
+        exp_output = "HELLO %(prog_name)s - Version %(ver_name)s - GPL\n" % locals(
+        )
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out,
+                                 version=ver_name, program=prog_name)
+        self.MockLogFlush()
 
-    self.utilCheckOutput(out, exp_output)
+        p.banner()
 
-  def testPromptDefaults(self):
-    """Does base.prompt() output correctly with default arguments?"""
+        self.utilCheckOutput(out, exp_output)
 
-    state = 101
-    out = self.MockStringIO()
-    exp_output = "NX> %(state)d " % locals()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testPromptDefaults(self):
+        """Does base.prompt() output correctly with default arguments?"""
 
-    p.prompt(state)
+        state = 101
+        out = self.MockStringIO()
+        exp_output = "NX> %(state)d " % locals()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-    self.utilCheckOutput(out, exp_output)
+        p.prompt(state)
 
-  def testPromptMessage(self):
-    """Does base.prompt() output correctly with a message?"""
+        self.utilCheckOutput(out, exp_output)
 
-    state = 101
-    send = "Hello, World!"
-    exp_output = "NX> %(state)d %(send)s\n" % locals()
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testPromptMessage(self):
+        """Does base.prompt() output correctly with a message?"""
 
-    p.prompt(state, send)
+        state = 101
+        send = "Hello, World!"
+        exp_output = "NX> %(state)d %(send)s\n" % locals()
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-    self.utilCheckOutput(out, exp_output)
+        p.prompt(state, send)
 
-  def testPromptOverrideNewlineTrueWithMsg(self):
-    """Does base.prompt() output correctly with a message and forced newline?"""
+        self.utilCheckOutput(out, exp_output)
 
-    state = 101
-    send = "Hello, World!"
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testPromptOverrideNewlineTrueWithMsg(self):
+        """Does base.prompt() output correctly with a message and forced newline?"""
 
-    exp_output = "NX> %(state)d %(send)s\n" % locals()
-    p.prompt(state, send, override_newline=True)
-    self.utilCheckOutput(out, exp_output)
+        state = 101
+        send = "Hello, World!"
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-  def testPromptOverrideNewlineFalseWithMsg(self):
-    """Does base.prompt() output correctly with a message and forced no newline?"""
+        exp_output = "NX> %(state)d %(send)s\n" % locals()
+        p.prompt(state, send, override_newline=True)
+        self.utilCheckOutput(out, exp_output)
 
-    state = 101
-    send = "Hello, World!"
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testPromptOverrideNewlineFalseWithMsg(self):
+        """Does base.prompt() output correctly with a message and forced no newline?"""
 
-    exp_output = "NX> %(state)d %(send)s" % locals()
-    p.prompt(state, send, override_newline=False)
-    self.utilCheckOutput(out, exp_output)
+        state = 101
+        send = "Hello, World!"
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-  def testPromptOverrideNewlineTrueWithoutMsg(self):
-    """Does base.prompt() output correctly without a message and forced newline?"""
+        exp_output = "NX> %(state)d %(send)s" % locals()
+        p.prompt(state, send, override_newline=False)
+        self.utilCheckOutput(out, exp_output)
 
-    state = 101
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testPromptOverrideNewlineTrueWithoutMsg(self):
+        """Does base.prompt() output correctly without a message and forced newline?"""
 
-    exp_output = "NX> %(state)d \n" % locals()
-    p.prompt(state, override_newline=True)
-    self.utilCheckOutput(out, exp_output)
+        state = 101
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-  def testPromptOverrideNewlineFalseWithoutMsg(self):
-    """Does base.prompt() output correctly without a message and forced no newline?"""
+        exp_output = "NX> %(state)d \n" % locals()
+        p.prompt(state, override_newline=True)
+        self.utilCheckOutput(out, exp_output)
 
-    state = 101
-    send = "Hello, World!"
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testPromptOverrideNewlineFalseWithoutMsg(self):
+        """Does base.prompt() output correctly without a message and forced no newline?"""
 
-    exp_output = "NX> %(state)d " % locals()
-    p.prompt(state, override_newline=False)
-    self.utilCheckOutput(out, exp_output)
+        state = 101
+        send = "Hello, World!"
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-  def testWriteDefaults(self):
-    """Does base.write() output correctly with a message?"""
+        exp_output = "NX> %(state)d " % locals()
+        p.prompt(state, override_newline=False)
+        self.utilCheckOutput(out, exp_output)
 
-    send = "Hello, World!"
-    exp_output = "%(send)s\n" % locals()
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testWriteDefaults(self):
+        """Does base.write() output correctly with a message?"""
 
-    p.write(send)
+        send = "Hello, World!"
+        exp_output = "%(send)s\n" % locals()
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-    self.utilCheckOutput(out, exp_output)
+        p.write(send)
 
-  def testWriteEmptyMsg(self):
-    """Does base.write() output correctly with an empty message?"""
+        self.utilCheckOutput(out, exp_output)
 
-    send=""
-    exp_output = "\n"
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testWriteEmptyMsg(self):
+        """Does base.write() output correctly with an empty message?"""
 
-    p.write(send)
+        send = ""
+        exp_output = "\n"
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-    self.utilCheckOutput(out, exp_output)
+        p.write(send)
 
-  def testWriteEmptyMsgNoNewline(self):
-    """Does base.write() output correctly with an empty message and no newline?"""
+        self.utilCheckOutput(out, exp_output)
 
-    send = exp_output = ""
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testWriteEmptyMsgNoNewline(self):
+        """Does base.write() output correctly with an empty message and no newline?"""
 
-    p.write(send, newline=False)
+        send = exp_output = ""
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-    self.utilCheckOutput(out, exp_output)
+        p.write(send, newline=False)
 
-  def testWriteNoNewline(self):
-    """Does base.write() output correctly with a message and no newline?"""
+        self.utilCheckOutput(out, exp_output)
 
-    send = exp_output = "Hello, World!"
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testWriteNoNewline(self):
+        """Does base.write() output correctly with a message and no newline?"""
 
-    p.write(send, newline=False)
+        send = exp_output = "Hello, World!"
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-    self.utilCheckOutput(out, exp_output)
+        p.write(send, newline=False)
 
-  def testWriteNoFlush(self):
-    """Does base.write() output correctly with a message and without flushing?"""
+        self.utilCheckOutput(out, exp_output)
 
-    send = "Hello, World!"
-    exp_output = "%(send)s\n" % locals()
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testWriteNoFlush(self):
+        """Does base.write() output correctly with a message and without flushing?"""
 
-    p.write(send, flush=False)
+        send = "Hello, World!"
+        exp_output = "%(send)s\n" % locals()
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-    self.utilCheckOutput(out, exp_output, flush=False)
+        p.write(send, flush=False)
 
-  def testWriteNoLog(self):
-    """Does base.write() output correctly with a message and without logging?"""
+        self.utilCheckOutput(out, exp_output, flush=False)
 
-    self.args = None
-    send = "Hello, World!"
-    exp_output = "%(send)s\n" % locals()
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testWriteNoLog(self):
+        """Does base.write() output correctly with a message and without logging?"""
 
-    p.write(send, log=False)
+        self.args = None
+        send = "Hello, World!"
+        exp_output = "%(send)s\n" % locals()
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-    self.utilCheckOutput(out, exp_output, log=False)
+        p.write(send, log=False)
 
-  def testWriteLogLevel(self):
-    """Does base.write() output correctly with a message and a specific log level?"""
+        self.utilCheckOutput(out, exp_output, log=False)
 
-    self.args = None
-    send = "Hello, World!"
-    exp_output = "%(send)s\n" % locals()
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testWriteLogLevel(self):
+        """Does base.write() output correctly with a message and a specific log level?"""
 
-    p.write(send, log_level=nxlog.LOG_ERR)
+        self.args = None
+        send = "Hello, World!"
+        exp_output = "%(send)s\n" % locals()
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-    self.utilCheckOutput(out, exp_output, log_level=nxlog.LOG_ERR)
+        p.write(send, log_level=nxlog.LOG_ERR)
 
-  def testWriteFd(self):
-    """Does base.write() output correctly with a message and a specific fd?"""
+        self.utilCheckOutput(out, exp_output, log_level=nxlog.LOG_ERR)
 
-    self.args = None
-    send = "Hello, World!"
-    exp_output = "%(send)s\n" % locals()
-    out = self.MockStringIO()
-    p = nxparser.base.parser(sys.stdin, out)
-    self.MockLogFlush()
+    def testWriteFd(self):
+        """Does base.write() output correctly with a message and a specific fd?"""
 
-    p.write(send, fd=out)
+        self.args = None
+        send = "Hello, World!"
+        exp_output = "%(send)s\n" % locals()
+        out = self.MockStringIO()
+        p = nxparser.base.parser(sys.stdin, out)
+        self.MockLogFlush()
 
-    self.utilCheckOutput(out, exp_output)
+        p.write(send, fd=out)
 
-  def testParseArgsNoArgsDefaults(self):
-    """Does base.parse_args() parse correctly with no extra args?"""
+        self.utilCheckOutput(out, exp_output)
 
-    sys.argv = ['argv0']
-    p = nxparser.base.parser(sys.stdin, sys.stdout)
+    def testParseArgsNoArgsDefaults(self):
+        """Does base.parse_args() parse correctly with no extra args?"""
 
-    p.parse_args()
+        sys.argv = ['argv0']
+        p = nxparser.base.parser(sys.stdin, sys.stdout)
 
-    self.assertEquals(None, p.version)
-    self.assertEquals(None, p.program)
+        p.parse_args()
 
-  def testParseArgsNoArgsVersionProgram(self):
-    """Does base.parse_args() parse correctly with no extra args and specified
-    default version string and program name?"""
+        self.assertEquals(None, p.version)
+        self.assertEquals(None, p.program)
 
-    sys.argv = ['argv0']
-    ver_name = "testverstring"
-    prog_name = "testprogstring"
-    p = nxparser.base.parser(sys.stdin, sys.stdout)
+    def testParseArgsNoArgsVersionProgram(self):
+        """Does base.parse_args() parse correctly with no extra args and specified
+        default version string and program name?"""
 
-    p.parse_args(version=ver_name, program=prog_name)
+        sys.argv = ['argv0']
+        ver_name = "testverstring"
+        prog_name = "testprogstring"
+        p = nxparser.base.parser(sys.stdin, sys.stdout)
 
-    self.assertEquals(ver_name, p.version)
-    self.assertEquals(prog_name, p.program)
+        p.parse_args(version=ver_name, program=prog_name)
 
-#Need to figure out how to test this:
+        self.assertEquals(ver_name, p.version)
+        self.assertEquals(prog_name, p.program)
+
+# Need to figure out how to test this:
 #  def testParseArgsWithArgsDefaults(self):
 #    sys.argv = ['argv0', '--help']
 #    p = nxparser.base.parser(sys.stdin, sys.stdout)
@@ -379,20 +385,20 @@ class NxParserBaseUnitTest(unittest.TestCase):
 #    p.parse_args()
 #
 
-  def testParseArgsWithArgsVersionProgram(self):
-    """Does base.parse_args() parse correctly with version string and program 
-    name specified by both args and defaults?"""
+    def testParseArgsWithArgsVersionProgram(self):
+        """Does base.parse_args() parse correctly with version string and program
+        name specified by both args and defaults?"""
 
-    ver_name = "testverstring"
-    prog_name = "testprogstring"
-    sys.argv = ['argv0', '--proto', ver_name, '--program', prog_name]
-    p = nxparser.base.parser(sys.stdin, sys.stdout)
+        ver_name = "testverstring"
+        prog_name = "testprogstring"
+        sys.argv = ['argv0', '--proto', ver_name, '--program', prog_name]
+        p = nxparser.base.parser(sys.stdin, sys.stdout)
 
-    p.parse_args()
+        p.parse_args()
 
-    self.assertEquals(ver_name, p.version)
-    self.assertEquals(prog_name, p.program)
+        self.assertEquals(ver_name, p.version)
+        self.assertEquals(prog_name, p.program)
 
 
 if __name__ == '__main__':
-  unittest.main()
+    unittest.main()

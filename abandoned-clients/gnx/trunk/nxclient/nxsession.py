@@ -24,8 +24,11 @@ from gtk import gdk
 import os
 
 # i18n will come!
-def _ (x):
+
+
+def _(x):
     return x
+
 
 class NXSession:
     sname = None
@@ -44,28 +47,30 @@ class NXSession:
     agent_password = ''
     screeninfo = '800x600x16+render'
 
-    def __init__ (self, name, session_type = None):
+    def __init__(self, name, session_type=None):
         self.sname = name
         if session_type:
             self.stype = session_type
 
-        f = os.popen ('xauth list :0 | awk \'{ print $3 }\'')
-        self.xcookie = f.read ().strip ()
-        f.close ()
+        f = os.popen('xauth list :0 | awk \'{ print $3 }\'')
+        self.xcookie = f.read().strip()
+        f.close()
 
         # we're probably under a GNOME session, let's try to grab the
         # info from gconf
-        if os.getenv ('GNOME_DESKTOP_SESSION_ID'):
-            f = os.popen ('gconftool-2 -g /desktop/gnome/peripherals/keyboard/xkb/model')
-            tmp = f.read ().strip ()
-            f.close ()
+        if os.getenv('GNOME_DESKTOP_SESSION_ID'):
+            f = os.popen(
+                'gconftool-2 -g /desktop/gnome/peripherals/keyboard/xkb/model')
+            tmp = f.read().strip()
+            f.close()
 
             if tmp:
                 self.kbtype = tmp
-                
-                f = os.popen ('gconftool-2 -g /desktop/gnome/peripherals/keyboard/xkb/layouts | tr -d \'[\' | tr -d \']\' | cut -d \',\' -f 1')
-                tmp = f.read ().strip ()
-                f.close ()
+
+                f = os.popen(
+                    'gconftool-2 -g /desktop/gnome/peripherals/keyboard/xkb/layouts | tr -d \'[\' | tr -d \']\' | cut -d \',\' -f 1')
+                tmp = f.read().strip()
+                f.close()
 
                 if tmp:
                     self.kbtype += '/' + tmp
@@ -74,12 +79,12 @@ class NXSession:
 
         # else, try to grab the keyboard setting from X itself
         if not self.kbtype:
-            f = os.popen ('xprop -root | grep "^_XKB_RULES_NAMES(STRING)"')
-            tmp = f.read ()
-            f.close ()
-        
+            f = os.popen('xprop -root | grep "^_XKB_RULES_NAMES(STRING)"')
+            tmp = f.read()
+            f.close()
+
             try:
-                tmp = tmp.split ('"')
+                tmp = tmp.split('"')
                 self.kbtype = '%s/%s' % (tmp[3], tmp[5])
             except AttributeError, IndexError:
                 # raise an exception warning about the keyboard not
@@ -87,25 +92,29 @@ class NXSession:
                 pass
 
         # detect screen information
-        screen = gdk.screen_get_default ()
+        screen = gdk.screen_get_default()
         self.screeninfo = '%dx%dx%d+render' % \
-                          (screen.get_width (), screen.get_height (),
-                           gdk.visual_get_best_depth ())
+                          (screen.get_width(), screen.get_height(),
+                           gdk.visual_get_best_depth())
 
-    def get_start_params (self):
+    def get_start_params(self):
         # FIXME: check if self.xcookie has contents, and raise
         # an exception if not
         pline = '--session="%s" --type="%s" ' % (self.sname, self.stype)
-        pline += '--cache="%s" --images="%s" ' % (self.cache, self.images_cache)
+        pline += '--cache="%s" --images="%s" ' % (
+            self.cache, self.images_cache)
         pline += '--cookie="%s" --link="%s" ' % (self.xcookie, self.link)
         pline += '--kbtype="%s" --nodelay="%s" ' % (self.kbtype, self.nodelay)
-        pline += '--backingstore="%s" --geometry="%s" ' % (self.backingstore, self.geometry)
-        pline += '--media="%s" --agent_server="%s" ' % (self.media, self.agent_server)
-        pline += '--agent_user="%s" --agent_password="%s" ' % (self.agent_user, self.agent_password)
+        pline += '--backingstore="%s" --geometry="%s" ' % (
+            self.backingstore, self.geometry)
+        pline += '--media="%s" --agent_server="%s" ' % (
+            self.media, self.agent_server)
+        pline += '--agent_user="%s" --agent_password="%s" ' % (
+            self.agent_user, self.agent_password)
         pline += '--screeninfo="%s"' % (self.screeninfo)
 
         return pline
 
 if __name__ == '__main__':
-    s = NXSession ('teste-gnome')
-    print s.get_start_params ()
+    s = NXSession('teste-gnome')
+    print s.get_start_params()
