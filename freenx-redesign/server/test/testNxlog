@@ -18,83 +18,81 @@
 #
 # Author: diamond@google.com (Stephen Shirley)
 
-oneTimeSetUp()
-{
-  # This unit test may need to be run while installed.
-  . "./include/test-functions.inc" && setupLoadConfig
-  abs_path="$(cd "$PATH_BIN" && pwd -L)/nxlog"
-  rel_path="./bin/nxlog"
-  above_path="bin/nxlog"
-  LOG_LEVEL=4
+oneTimeSetUp() {
+	# This unit test may need to be run while installed.
+	. "./include/test-functions.inc" && setupLoadConfig
+	abs_path="$(cd "$PATH_BIN" && pwd -L)/nxlog"
+	rel_path="./bin/nxlog"
+	above_path="bin/nxlog"
+	LOG_LEVEL=4
 }
 
-setUp()
-{
-  cd "$TEST_DIR"
+setUp() {
+	cd "$TEST_DIR"
 }
 
 sourcePrep() {
-  set -e
+	set -e
 }
 
-testRunAbsolute () {
-  "$abs_path" "$LOG_LEVEL" "$_su_func"
-  assertTrue "nxlog fails to run from an absolute path" "$?"
+testRunAbsolute() {
+	"$abs_path" "$LOG_LEVEL" "$_su_func"
+	assertTrue "nxlog fails to run from an absolute path" "$?"
 }
 
-testRunRelative () {
-  "$rel_path" "$LOG_LEVEL" "$_su_func"
-  assertTrue "nxlog fails to run from a relative path" "$?"
+testRunRelative() {
+	"$rel_path" "$LOG_LEVEL" "$_su_func"
+	assertTrue "nxlog fails to run from a relative path" "$?"
 }
 
-testRunAbove () {
-  "$above_path" "$LOG_LEVEL" "$_su_func"
-  assertTrue "nxlog fails to run from the parent dir" "$?"
+testRunAbove() {
+	"$above_path" "$LOG_LEVEL" "$_su_func"
+	assertTrue "nxlog fails to run from the parent dir" "$?"
 }
 
-testSourceAbsolute () {
-  ( sourcePrep && . "$abs_path" && nxlog_log "$LOG_LEVEL" "$_su_func" )
-  assertTrue "nxlog fails when sourced with an absolute path" "$?"
+testSourceAbsolute() {
+	(sourcePrep && . "$abs_path" && nxlog_log "$LOG_LEVEL" "$_su_func")
+	assertTrue "nxlog fails when sourced with an absolute path" "$?"
 }
 
-testSourceRelative () {
-  ( sourcePrep && . "$rel_path" && nxlog_log "$LOG_LEVEL" "$_su_func" )
-  assertTrue "nxlog fails when sourced with a relative path" "$?"
+testSourceRelative() {
+	(sourcePrep && . "$rel_path" && nxlog_log "$LOG_LEVEL" "$_su_func")
+	assertTrue "nxlog fails when sourced with a relative path" "$?"
 }
 
-testSetupExtraLogging () {
-  ( [ "do_called" =  "$( sourcePrep && setup_extra_logging="do_call" && 
-      . "$rel_path" && nxlog_log "$LOG_LEVEL" "$_su_func" )" ] )
-  assertTrue "nxlog fails to honour setup_extra_logging" "$?"
+testSetupExtraLogging() {
+	([ "do_called" = "$(sourcePrep && setup_extra_logging="do_call" \
+		&& . "$rel_path" && nxlog_log "$LOG_LEVEL" "$_su_func")" ])
+	assertTrue "nxlog fails to honour setup_extra_logging" "$?"
 }
 
-testNxlog_log_level_2_log4shName () {
-  FROM="EMERG"
-  TO="FATAL"
-  ret="$( ( sourcePrep && . "$rel_path" && _nxlog_log_level_2_log4sh "$FROM"; ) )"
-  assertEquals "_nxlog_log_level_2_log4sh fails to map $FROM to $TO" "$TO" "$ret"
+testNxlog_log_level_2_log4shName() {
+	FROM="EMERG"
+	TO="FATAL"
+	ret="$( (sourcePrep && . "$rel_path" && _nxlog_log_level_2_log4sh "$FROM"))"
+	assertEquals "_nxlog_log_level_2_log4sh fails to map $FROM to $TO" "$TO" "$ret"
 }
 
-testNxlog_log_level_2_log4shNum () {
-  FROM="7"
-  TO="DEBUG"
-  ret="$( ( sourcePrep && . "$rel_path" && _nxlog_log_level_2_log4sh "$FROM"; ) )"
-  assertEquals "_nxlog_log_level_2_log4sh fails to map $FROM to $TO" "$TO" "$ret"
+testNxlog_log_level_2_log4shNum() {
+	FROM="7"
+	TO="DEBUG"
+	ret="$( (sourcePrep && . "$rel_path" && _nxlog_log_level_2_log4sh "$FROM"))"
+	assertEquals "_nxlog_log_level_2_log4sh fails to map $FROM to $TO" "$TO" "$ret"
 }
 
-testNxlog_log_level_2_log4shInvalidLvl () {
-  FROM="hello world"
-  TO="INFO"
-  ret=$( ( sourcePrep && setup_extra_logging="do_call" && . "$rel_path" && \
-  _nxlog_log_level_2_log4sh "$FROM"; ) )
-  LOGGED=$(echo "$ret" | head -1)
-  assertEquals "_nxlog_log_level_2_log4sh didn't log error for invalid level" "do_called" "$LOGGED"
-  LEVEL=$(echo "$ret" | tail -1)
-  assertEquals "_nxlog_log_level_2_log4sh fails to map invalid level to $TO" "$TO" "$LEVEL"
+testNxlog_log_level_2_log4shInvalidLvl() {
+	FROM="hello world"
+	TO="INFO"
+	ret=$( (sourcePrep && setup_extra_logging="do_call" && . "$rel_path" \
+		&& _nxlog_log_level_2_log4sh "$FROM"))
+	LOGGED=$(echo "$ret" | head -1)
+	assertEquals "_nxlog_log_level_2_log4sh didn't log error for invalid level" "do_called" "$LOGGED"
+	LEVEL=$(echo "$ret" | tail -1)
+	assertEquals "_nxlog_log_level_2_log4sh fails to map invalid level to $TO" "$TO" "$LEVEL"
 }
 
-do_call () {
-  echo "do_called"
+do_call() {
+	echo "do_called"
 }
 
 . ../utility/shunit2

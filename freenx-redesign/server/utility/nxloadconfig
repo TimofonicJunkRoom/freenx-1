@@ -55,7 +55,6 @@ PATH_BASE="${PATH_BASE:-/usr/freenx}"
 PATH_ETC="${PATH_ETC:-$PATH_BASE/etc}"
 PATH_BIN="${PATH_BIN:-$PATH_BASE/bin}"
 
-
 check_command_vars() {
 	check_command_var COMMAND_START_KDE "$(which startkde:-NOTFOUND)"
 	check_command_var COMMAND_START_GNOME "$(which gnome-session:-NOTFOUND)"
@@ -72,7 +71,6 @@ check_command_vars() {
 	check_command_var NXSESSION_HOOK "$(which nxsession:-NOTFOUND)"
 }
 
-
 check_dir_vars() {
 	check_dir_var PATH_BASE "$PATH_BASE"
 	check_dir_var PATH_BIN "$PATH_BASE/bin"
@@ -80,11 +78,10 @@ check_dir_vars() {
 	check_dir_var PATH_LIB "$PATH_BASE/lib"
 }
 
-
 parse_args() {
 	# Horrible hack to parse the output of getopt correctly
 	eval ARGS=("$("$COMMAND_GETOPT" -n "$SCRIPT_NAME" -o "h" -l "config:,help" -- \
-	"${ORIG_ARGS[@]:-}")")
+		"${ORIG_ARGS[@]:-}")")
 
 	if [ "$?" != "0" ]; then
 		echo "Error: unable to parse arguments: \"${ORIG_ARGS[@]}\"" >&2
@@ -92,22 +89,32 @@ parse_args() {
 	fi
 }
 
-
 process_args() {
 	local HELP="no"
 
 	while true; do
 		case "$1" in
-			--config) CONF_NAME="$2"; shift 2 ;;
-			-h|--help) HELP="yes"; shift ;;
-			--) shift; break ;;
-			*) echo "$SCRIPT_NAME: error parsing cmdline: $@" >&2; exit 1 ;;
+			--config)
+				CONF_NAME="$2"
+				shift 2
+				;;
+			-h | --help)
+				HELP="yes"
+				shift
+				;;
+			--)
+				shift
+				break
+				;;
+			*)
+				echo "$SCRIPT_NAME: error parsing cmdline: $@" >&2
+				exit 1
+				;;
 		esac
 	done
 
 	[ "$HELP" = "yes" ] && usage
 }
-
 
 usage() {
 	{
@@ -121,14 +128,12 @@ usage() {
 	exit 0
 }
 
-
 default_if_not_set() {
 	local var="$1"
 	local default="$2"
 
 	# Is the var set?
-	if ! declare -p "$var" &> /dev/null
-	then
+	if ! declare -p "$var" &>/dev/null; then
 		# Var is not set, set it to the default now and return
 		eval "$var"="\"$default\""
 		return 0
@@ -138,7 +143,6 @@ default_if_not_set() {
 	fi
 }
 
-
 check_dir_var() {
 	local var="$1"
 	local defdir="$2"
@@ -147,8 +151,7 @@ check_dir_var() {
 
 	# Only check current value if it's actually been set
 	if ! default_if_not_set "$var" "$defdir"; then
-		if [ ! -d "$varval" ]
-		then
+		if [ ! -d "$varval" ]; then
 			nxlog_log $_NXLOG_LOG_WARNING "Invalid directory variable $var: \"$varval\""
 			eval "$var"="\"$defdir\""
 		else
@@ -157,13 +160,11 @@ check_dir_var() {
 		fi
 	fi
 
-	if [ ! -d "$defdir" ]
-	then
+	if [ ! -d "$defdir" ]; then
 		nxlog_log $_NXLOG_LOG_ERR "Invalid default directory variable $var: \"$defdir\""
 		exit 1
 	fi
 }
-
 
 check_command_var() {
 	local var="$1"
@@ -173,8 +174,7 @@ check_command_var() {
 
 	# Only check current value if it's actually been set
 	if ! default_if_not_set "$var" "$defcmd"; then
-		if [ ! -x "$varval" -o ! -f "$varval" ]
-		then
+		if [ ! -x "$varval" -o ! -f "$varval" ]; then
 			nxlog_log $_NXLOG_LOG_WARNING "Invalid command variable $var: \"$varval\""
 			eval "$var"="\"$defcmd\""
 		else
@@ -187,14 +187,12 @@ check_command_var() {
 	if [ "$defcmd" = "" ]; then
 		eval "$var"="\"NOTFOUND\""
 	else
-		if [ ! -x "$defcmd" -o ! -f "$defcmd" ]
-		then
+		if [ ! -x "$defcmd" -o ! -f "$defcmd" ]; then
 			nxlog_log $_NXLOG_LOG_ERR "Invalid default command variable $var: \"$defcmd\""
 			exit 1
 		fi
 	fi
 }
-
 
 load_file() {
 	local file="$1"
@@ -220,8 +218,8 @@ nxloadconfig_main() {
 	load_file "nxlog"
 
 	# Load function-specific configuration
-	[ -n "${CONF_NAME:-}" -a -e "$PATH_ETC/${CONF_NAME:-}.conf" ] && \
-		load_file "$PATH_ETC/$CONF_NAME.conf"
+	[ -n "${CONF_NAME:-}" -a -e "$PATH_ETC/${CONF_NAME:-}.conf" ] \
+		&& load_file "$PATH_ETC/$CONF_NAME.conf"
 
 	# In case the function-specific config updates $LOG_LEVEL
 	_nxlog_set_log_level

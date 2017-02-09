@@ -31,25 +31,25 @@ import nxparser
 
 
 def signal_handler(signum, unused_frame):
-  nxlog.log(nxlog.LOG_DEBUG, 'Going down on signal %d' % signum)
-  sys.exit(1)
+    nxlog.log(nxlog.LOG_DEBUG, 'Going down on signal %d' % signum)
+    sys.exit(1)
 
 
 def main():
-  nxlog.setup('nxserver')
-  nxlog.set_log_level(nxlog.LOG_DEBUG)
-  nxlog.log(nxlog.LOG_DEBUG, 'Startup')
-  nxlog.log(nxlog.LOG_DEBUG, 'Args %r' % sys.argv)
+    nxlog.setup('nxserver')
+    nxlog.set_log_level(nxlog.LOG_DEBUG)
+    nxlog.log(nxlog.LOG_DEBUG, 'Startup')
+    nxlog.log(nxlog.LOG_DEBUG, 'Args %r' % sys.argv)
 
-  signal.signal(signal.SIGINT, signal_handler)
-  signal.signal(signal.SIGTERM, signal_handler)
-  signal.signal(signal.SIGHUP, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGHUP, signal_handler)
 
-  parser = nxparser.server.parser(sys.stdin, sys.stdout)
-  parser.banner()
-  parser.loop()
-  nxlog.log(nxlog.LOG_DEBUG, 'Finished')
+    parser = nxparser.server.parser(sys.stdin, sys.stdout)
+    parser.banner()
+    parser.loop()
+    nxlog.log(nxlog.LOG_DEBUG, 'Finished')
 
 
 if __name__ == '__main__':
-  main()
+    main()

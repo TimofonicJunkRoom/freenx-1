@@ -12,8 +12,7 @@
 # FIXME: load config here
 PATH_BIN=$(cd $(dirname $0) && pwd)
 
-if [ "$2" = "ff" ]
-then
+if [ "$2" = "ff" ]; then
 	exit 1
 fi
 

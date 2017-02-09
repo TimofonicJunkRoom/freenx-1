@@ -22,7 +22,7 @@ TEST_SHELL="/bin/bash"
 TEST_FILES="testTest-functions testNxlog testNxserver-login testNxloadconfig testClient2server-regression-*"
 
 for file in $TEST_FILES; do
-  echo "============> Running $file:"
-  "$TEST_SHELL" ./"$file"
-  echo "============> Finished $file:"
+	echo "============> Running $file:"
+	"$TEST_SHELL" ./"$file"
+	echo "============> Finished $file:"
 done

@@ -23,135 +23,125 @@
 aEquals() { [ "$2" = "$3" ]; }
 aTrue() { return "$2"; }
 
-testReadLineX()
-{
-  input="line1\nline2\nline3\nline4"
-  ret=$(printf "$input" | readLineX 1)
-  assertEquals "Correct line(1) was not returned" "line1" "$ret"
-  ret=$(printf "$input" | readLineX 4)
-  assertEquals "Correct line(4) was not returned" "line4" "$ret"
+testReadLineX() {
+	input="line1\nline2\nline3\nline4"
+	ret=$(printf "$input" | readLineX 1)
+	assertEquals "Correct line(1) was not returned" "line1" "$ret"
+	ret=$(printf "$input" | readLineX 4)
+	assertEquals "Correct line(4) was not returned" "line4" "$ret"
 }
 
-testToUpper()
-{
-  input="AAbbVVVcccDDD4223'1#24Azz"
-  expected_output="AABBVVVCCCDDD4223'1#24AZZ"
-  assertEquals "toUpper output isn't correct" "$(toupper "$input")" "$expected_output"
+testToUpper() {
+	input="AAbbVVVcccDDD4223'1#24Azz"
+	expected_output="AABBVVVCCCDDD4223'1#24AZZ"
+	assertEquals "toUpper output isn't correct" "$(toupper "$input")" "$expected_output"
 }
 
-testTrim()
-{
-  input=$(printf "hello world\r\n")
-  expected_output="hello world"
-  assertEquals "Trim didn't trim correctly" "$(trim "$input")" "$expected_output"
+testTrim() {
+	input=$(printf "hello world\r\n")
+	expected_output="hello world"
+	assertEquals "Trim didn't trim correctly" "$(trim "$input")" "$expected_output"
 }
 
-testReadTrimToupper()
-{
-  EXPECT="helloworld"
-  assertEquals "readTrimToupper fails basic check" \
-  "$(toupper "$EXPECT")" "$(eval "readTrimToupper $EXTERN_STDOUT<< EOT
+testReadTrimToupper() {
+	EXPECT="helloworld"
+	assertEquals "readTrimToupper fails basic check" \
+		"$(toupper "$EXPECT")" "$(eval "readTrimToupper $EXTERN_STDOUT<< EOT
 $EXPECT
 EOT
   ")"
 
-  EXPECT="helloworld "
-  assertEquals "readTrimToupper doesn't respect trailing whitespace" \
-  "$(toupper "$EXPECT")" "$(eval "readTrimToupper $EXTERN_STDOUT<< EOT
+	EXPECT="helloworld "
+	assertEquals "readTrimToupper doesn't respect trailing whitespace" \
+		"$(toupper "$EXPECT")" "$(eval "readTrimToupper $EXTERN_STDOUT<< EOT
 $EXPECT
 EOT
   ")"
 
-  EXPECT="hello world"
-  assertEquals "readTrimToupper doesn't respect inline whitespace" \
-  "$(toupper "$EXPECT")" "$(eval "readTrimToupper $EXTERN_STDOUT<< EOT
+	EXPECT="hello world"
+	assertEquals "readTrimToupper doesn't respect inline whitespace" \
+		"$(toupper "$EXPECT")" "$(eval "readTrimToupper $EXTERN_STDOUT<< EOT
 $EXPECT
 EOT
   ")"
 
-  EXPECT=" hello  world   "
-  assertEquals "readTrimToupper doesn't respect whitespace everywhere" \
-  "$(toupper "$EXPECT")" "$(eval "readTrimToupper $EXTERN_STDOUT<< EOT
+	EXPECT=" hello  world   "
+	assertEquals "readTrimToupper doesn't respect whitespace everywhere" \
+		"$(toupper "$EXPECT")" "$(eval "readTrimToupper $EXTERN_STDOUT<< EOT
 $EXPECT
 EOT
   ")"
 }
 
-testRecvCheck()
-{
-  EXPECT="helloworld"
-  eval "recvCheck '' \"$EXPECT\" $EXTERN_STDOUT<< EOT
+testRecvCheck() {
+	EXPECT="helloworld"
+	eval "recvCheck '' \"$EXPECT\" $EXTERN_STDOUT<< EOT
 $EXPECT
 EOT"
-  assertTrue "recvCheck fails to match when it should" $?
+	assertTrue "recvCheck fails to match when it should" $?
 
-  EXPECT="helloworld"
-  eval "recvCheck '' \"$EXPECT\" $EXTERN_STDOUT<< EOT
+	EXPECT="helloworld"
+	eval "recvCheck '' \"$EXPECT\" $EXTERN_STDOUT<< EOT
 $EXPECT bogus
 EOT"
-  assertFalse "recvCheck matches when it shouldn't" $?
+	assertFalse "recvCheck matches when it shouldn't" $?
 }
 
-testRecvCheckRegx()
-{
-  EXPECT="helloworld"
-  eval "recvCheckRegx '' 'hell.{3}[ra]ld' $EXTERN_STDOUT<< EOT
+testRecvCheckRegx() {
+	EXPECT="helloworld"
+	eval "recvCheckRegx '' 'hell.{3}[ra]ld' $EXTERN_STDOUT<< EOT
 $EXPECT
 EOT"
-  assertTrue "recvCheckRegx fails to match when it should" $?
+	assertTrue "recvCheckRegx fails to match when it should" $?
 
-  EXPECT="helloworld"
-  eval "recvCheckRegx '' 'hell.{3}[wa]ld' $EXTERN_STDOUT<< EOT
+	EXPECT="helloworld"
+	eval "recvCheckRegx '' 'hell.{3}[wa]ld' $EXTERN_STDOUT<< EOT
 $EXPECT
 EOT"
-  assertFalse "recvCheckRegx matches when it shouldn't" $?
+	assertFalse "recvCheckRegx matches when it shouldn't" $?
 }
 
-testSendRecvCheck()
-{
-  sendRecvSetup
+testSendRecvCheck() {
+	sendRecvSetup
 
-  EXPECT="hello world"
-  sendRecvCheck "$EXPECT" "" "$EXPECT"
-  assertTrue "sendRecvCheck doesn't match when it should" $?
+	EXPECT="hello world"
+	sendRecvCheck "$EXPECT" "" "$EXPECT"
+	assertTrue "sendRecvCheck doesn't match when it should" $?
 
-  sendRecvCheck "$EXPECT" "" "$EXPECT bogus"
-  assertFalse "sendRecvCheck matches when it shouldn't" $?
+	sendRecvCheck "$EXPECT" "" "$EXPECT bogus"
+	assertFalse "sendRecvCheck matches when it shouldn't" $?
 
-  sendRecvTearDown
+	sendRecvTearDown
 }
 
-testSendRecvCheckRegx()
-{
-  sendRecvSetup
+testSendRecvCheckRegx() {
+	sendRecvSetup
 
-  EXPECT='hell.{3}[ra]ld'
-  sendRecvCheckRegx "helloworld" "" "$EXPECT"
-  assertTrue "sendRecvCheckRegx doesn't match when it should" $?
+	EXPECT='hell.{3}[ra]ld'
+	sendRecvCheckRegx "helloworld" "" "$EXPECT"
+	assertTrue "sendRecvCheckRegx doesn't match when it should" $?
 
-  EXPECT='hell.{3}[wa]ld'
-  sendRecvCheckRegx "helloworld" "" "$EXPECT"
-  assertFalse "sendRecvCheckRegx matches when it shouldn't" $?
+	EXPECT='hell.{3}[wa]ld'
+	sendRecvCheckRegx "helloworld" "" "$EXPECT"
+	assertFalse "sendRecvCheckRegx matches when it shouldn't" $?
 
-  sendRecvTearDown
+	sendRecvTearDown
 }
 
-sendRecvSetup()
-{
-  EXTERN_TEST=4
-  rm -rf .extern.*
-  mkfifo .extern.test
-  eval "exec $EXTERN_TEST<>.extern.test"
-  EXTERN_WRITE=$EXTERN_TEST
-  EXTERN_READ=$EXTERN_TEST
+sendRecvSetup() {
+	EXTERN_TEST=4
+	rm -rf .extern.*
+	mkfifo .extern.test
+	eval "exec $EXTERN_TEST<>.extern.test"
+	EXTERN_WRITE=$EXTERN_TEST
+	EXTERN_READ=$EXTERN_TEST
 }
 
-sendRecvTearDown()
-{
-  eval "exec $EXTERN_TEST<&-"
-  rm -rf .extern.*
-  unset EXTERN_WRITE
-  unset EXTERN_READ
+sendRecvTearDown() {
+	eval "exec $EXTERN_TEST<&-"
+	rm -rf .extern.*
+	unset EXTERN_WRITE
+	unset EXTERN_READ
 }
 
 . ../utility/shunit2

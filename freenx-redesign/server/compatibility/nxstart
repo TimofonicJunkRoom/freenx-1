@@ -41,7 +41,10 @@
 # SVN: $Id: $
 #
 
-. nxloadconfig --config="nxstart" || { echo "NX 503> Internal server error. nxloadconfig could not be loaded by nxstart."; exit 1; }
+. nxloadconfig --config="nxstart" || {
+	echo "NX 503> Internal server error. nxloadconfig could not be loaded by nxstart."
+	exit 1
+}
 
 AGENT_PID="$1"
 shift
@@ -54,8 +57,8 @@ echo "Xft.dpi: 96" | LANG=C xrdb -merge 2>&1 | nxlog_log_pipe DEBUG
 
 msg="Cmd exited, nxagent (pid $AGENT_PID)"
 if kill -0 "$AGENT_PID" &>/dev/null; then
-  nxlog_log DEBUG "$msg still exists, killing"
-  kill "$AGENT_PID" || nxlog_log ERR "Killing nxagent returned error $?"
+	nxlog_log DEBUG "$msg still exists, killing"
+	kill "$AGENT_PID" || nxlog_log ERR "Killing nxagent returned error $?"
 else
-  nxlog_log NOTICE "$msg already exited"
+	nxlog_log NOTICE "$msg already exited"
 fi

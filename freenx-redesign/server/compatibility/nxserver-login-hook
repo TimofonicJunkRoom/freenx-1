@@ -24,10 +24,10 @@ COMMAND_SSH="ssh"
 case "$1" in
 	ssh)
 		exec $COMMAND_SSH -2 -x -l "$2" "$SSH_HOST" -p "$SSH_PORT" -o "NumberOfPasswordPrompts 1" "PATH=$PATH" "$3" "$4"
-	;;
+		;;
 	su)
 		exec $COMMAND_SU - "$2" -c "PATH=$PATH $3 $4"
-	;;
+		;;
 esac
 
 exit 1

@@ -53,32 +53,29 @@ _NXLOG_LOG_NOTICE=5
 _NXLOG_LOG_INFO=6
 _NXLOG_LOG_DEBUG=7
 
-_nxlog_log_level_2_log4sh()
-{
+_nxlog_log_level_2_log4sh() {
 	local def_lev="INFO"
 	case "$1" in
-		$_NXLOG_LOG_EMERG|EMERG) echo FATAL ;;
-		$_NXLOG_LOG_ALERT|ALERT) echo FATAL ;;
-		$_NXLOG_LOG_CRIT|CRIT) echo ERROR ;;
-		$_NXLOG_LOG_ERR|ERR) echo ERROR ;;
-		$_NXLOG_LOG_WARNING|WARNING) echo WARN ;;
-		$_NXLOG_LOG_NOTICE|NOTICE) echo INFO ;;
-		$_NXLOG_LOG_INFO|INFO) echo INFO ;;
-		$_NXLOG_LOG_DEBUG|DEBUG) echo DEBUG ;;
+		$_NXLOG_LOG_EMERG | EMERG) echo FATAL ;;
+		$_NXLOG_LOG_ALERT | ALERT) echo FATAL ;;
+		$_NXLOG_LOG_CRIT | CRIT) echo ERROR ;;
+		$_NXLOG_LOG_ERR | ERR) echo ERROR ;;
+		$_NXLOG_LOG_WARNING | WARNING) echo WARN ;;
+		$_NXLOG_LOG_NOTICE | NOTICE) echo INFO ;;
+		$_NXLOG_LOG_INFO | INFO) echo INFO ;;
+		$_NXLOG_LOG_DEBUG | DEBUG) echo DEBUG ;;
 		*)
 			nxlog_log ERR "_nxlog_log_level_2_log4sh: Invalid log level \"$1\", defaulting to \"$def_lev\""
 			echo "$def_lev"
-		;;
+			;;
 	esac
 }
 
-_nxlog_set_log_level()
-{
-	logger_setLevel `_nxlog_log_level_2_log4sh $LOG_LEVEL`
+_nxlog_set_log_level() {
+	logger_setLevel $(_nxlog_log_level_2_log4sh $LOG_LEVEL)
 }
 
-_nxlog_import_log4sh()
-{
+_nxlog_import_log4sh() {
 	# If the library is already imported, return.
 	[ -n "${__LOG4SH_VERSION:-}" ] && return
 
@@ -92,8 +89,7 @@ _nxlog_import_log4sh()
 	LOG4SH_CONFIGURATION='none' . $_NXLOG_LOG4SH
 }
 
-_nxlog_setup_log4sh()
-{
+_nxlog_setup_log4sh() {
 	# Import the log4sh library if necessary
 	_nxlog_import_log4sh "$1"
 	# Reset the configuration
@@ -111,28 +107,24 @@ _nxlog_setup_log4sh()
 	appender_setType syslog SyslogAppender
 	appender_syslog_setFacility syslog daemon
 
-  # Allow tests etc to setup extra logging
-  if declare -f "${setup_extra_logging:-}" &>/dev/null; then
-    "$setup_extra_logging"
-  fi
+	# Allow tests etc to setup extra logging
+	if declare -f "${setup_extra_logging:-}" &>/dev/null; then
+		"$setup_extra_logging"
+	fi
 }
 
-nxlog_log()
-{
+nxlog_log() {
 	PRIORITY="$1"
-	if [ "$#" -le "1" ]
-	then
+	if [ "$#" -le "1" ]; then
 		return
 	fi
 	shift
-	log `_nxlog_log_level_2_log4sh $PRIORITY` "$@"
+	log $(_nxlog_log_level_2_log4sh $PRIORITY) "$@"
 }
 
-nxlog_log_pipe()
-{
+nxlog_log_pipe() {
 	PRIORITY="$1"
-	while read
-	do
+	while read; do
 		nxlog_log "$PRIORITY" ${NXLOG_LOG_PIPE_PREFIX:-} $REPLY
 	done
 }
@@ -141,12 +133,10 @@ nxlog_log_pipe()
 
 _nxlog_setup_log4sh "$0"
 
-if [ "$#" -le "1" ]
-then
+if [ "$#" -le "1" ]; then
 	# If we are being run rather than sourced, read log data in from
 	# stdin.
-	if [ "$SCRIPT_NAME" = "nxlog" ]
-	then
+	if [ "$SCRIPT_NAME" = "nxlog" ]; then
 		if [ "$#" = "1" ]; then
 			PRIORITY="$1"
 			shift
